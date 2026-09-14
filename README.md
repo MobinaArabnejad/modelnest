@@ -1,36 +1,74 @@
 # ModelNest
 
-ModelNest is a self-hosted ML model manager and inference API built with FastAPI.
+ModelNest is a self-hosted ML model manager and inference API built with FastAPI. It provides model projects, versioned artifacts, access controls, API keys, and constrained inference without loading executable Python model files.
 
-## Planned capabilities
+## Features
 
-- User accounts and role-based access control
-- Private and public model projects
-- Model files and version metadata
-- API keys for inference requests
-- Dataset upload and export
-- Optional remote model import with strict URL validation
-- Docker-based local deployment
+- JWT authentication with Argon2 password hashing
+- First-user administrator bootstrap and server-side role enforcement
+- Public/private model projects and per-user sharing
+- Versioned `.json`, `.onnx`, and `.safetensors` artifact storage
+- Upload size limits, randomized storage names, and SHA-256 checksums
+- Revocable API keys stored only as hashes
+- Linear JSON model inference using JWT or API-key authentication
+- SQLite for local development and PostgreSQL through Docker Compose
+- Automated tests, linting, Dependabot, and a security policy
 
-## Development status
+ModelNest never deserializes pickle, joblib, or arbitrary Python objects. ONNX and Safetensors files can be stored in `v0.1.0`, but automatic inference is limited to the documented linear JSON format.
 
-This repository is an initial scaffold. The first milestone is authentication and model metadata CRUD; inference and file storage will be added only after the basic security tests are in place.
-
-## Local setup
+## Run locally
 
 ```powershell
-python -m venv .venv
+py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 uvicorn app.main:app --reload
 ```
 
-The health endpoint is available at `http://127.0.0.1:8000/health`.
+Open `http://127.0.0.1:8000/docs`. Local development defaults to SQLite.
+
+## Run with Docker
+
+Copy `.env.example` to `.env`, replace both secrets, and then run:
+
+```text
+docker compose up --build
+```
+
+For a production deployment, set `MODELNEST_ENV=production`. Startup will fail unless both the signing key and administrator bootstrap token are replaced with strong values. The bootstrap token is required only when registering the first administrator.
+
+## API workflow
+
+1. `POST /api/auth/register` — the first account becomes an administrator.
+2. `POST /api/auth/login` — obtain a bearer token.
+3. `POST /api/models` — create a model project.
+4. `POST /api/models/{id}/versions` — upload a model artifact as multipart form data.
+5. `POST /api/keys` — create an inference API key; the full value is shown once.
+6. `POST /api/models/{id}/versions/{version}/infer` — run constrained inference.
+
+A linear JSON model uses this format:
+
+```json
+{"weights": [0.5, -1.0], "bias": 0.25}
+```
+
+An inference request uses:
+
+```json
+{"features": [2.0, 3.0]}
+```
 
 ## Security
 
-Please read [SECURITY.md](SECURITY.md). Never commit passwords, API keys, model files containing sensitive data, or production secrets.
+Read [SECURITY.md](SECURITY.md) before testing or reporting an issue. Test only systems and accounts you own or have explicit authorization to assess. Do not commit `.env`, API keys, passwords, private datasets, or model files containing sensitive information.
+
+## Development
+
+```powershell
+ruff check .
+pytest -q
+```
 
 ## License
 
-MIT. Add your name and year before the first public release.
+MIT — see [LICENSE](LICENSE).

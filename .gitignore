@@ -8,6 +8,7 @@ __pycache__/
 .env.*
 !.env.example
 data/
+*.db
 models/
 *.safetensors
 *.onnx
