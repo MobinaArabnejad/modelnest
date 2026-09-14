@@ -14,7 +14,7 @@ ModelNest is a self-hosted ML model manager and inference API built with FastAPI
 - SQLite for local development and PostgreSQL through Docker Compose
 - Automated tests, linting, Dependabot, and a security policy
 
-ModelNest never deserializes pickle, joblib, or arbitrary Python objects. ONNX and Safetensors files can be stored in `v0.1.0`, but automatic inference is limited to the documented linear JSON format.
+ModelNest never deserializes pickle, joblib, or arbitrary Python objects. ONNX and Safetensors files can be stored, but automatic inference is limited to the documented linear JSON format.
 
 ## Run locally
 
@@ -35,11 +35,11 @@ Copy `.env.example` to `.env`, replace both secrets, and then run:
 docker compose up --build
 ```
 
-For a production deployment, set `MODELNEST_ENV=production`. Startup will fail unless both the signing key and administrator bootstrap token are replaced with strong values. The bootstrap token is required only when registering the first administrator.
+For a deployment, set `MODELNEST_ENV=production` and replace both secrets with strong values. The bootstrap token is required when registering the first administrator in every environment; it prevents an unauthenticated user from claiming a fresh instance.
 
 ## API workflow
 
-1. `POST /api/auth/register` — the first account becomes an administrator.
+1. `POST /api/auth/register` with `bootstrap_token` — the first account becomes an administrator only when the configured bootstrap token is supplied.
 2. `POST /api/auth/login` — obtain a bearer token.
 3. `POST /api/models` — create a model project.
 4. `POST /api/models/{id}/versions` — upload a model artifact as multipart form data.

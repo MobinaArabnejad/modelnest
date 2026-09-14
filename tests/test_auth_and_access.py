@@ -77,3 +77,29 @@ def test_production_requires_bootstrap_token(tmp_path) -> None:
         )
         assert created.status_code == 201
         assert created.json()["role"] == "admin"
+
+
+def test_default_environment_requires_bootstrap_token(tmp_path) -> None:
+    settings = Settings(
+        environment="development",
+        database_url=f"sqlite:///{tmp_path / 'development.db'}",
+        secret_key="development-secret-key-with-more-than-thirty-two-characters",
+        bootstrap_token="development-bootstrap-token-12345",
+        storage_dir=tmp_path / "artifacts",
+    )
+    with TestClient(create_app(settings)) as development_client:
+        denied = development_client.post(
+            "/api/auth/register", json={"username": "owner", "password": "secure-password"}
+        )
+        assert denied.status_code == 403
+
+        created = development_client.post(
+            "/api/auth/register",
+            json={
+                "username": "owner",
+                "password": "secure-password",
+                "bootstrap_token": "development-bootstrap-token-12345",
+            },
+        )
+        assert created.status_code == 201
+        assert created.json()["role"] == "admin"

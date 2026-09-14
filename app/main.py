@@ -25,7 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application = FastAPI(
         title="ModelNest API",
-        version="0.1.0",
+        version="0.1.1",
         description="Secure, self-hosted model storage and constrained inference.",
         docs_url="/docs",
         redoc_url="/redoc",

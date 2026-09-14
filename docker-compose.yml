@@ -18,7 +18,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      MODELNEST_ENV: ${MODELNEST_ENV:-development}
+      MODELNEST_ENV: ${MODELNEST_ENV:-production}
       MODELNEST_DATABASE_URL: postgresql+psycopg://modelnest:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/modelnest
       MODELNEST_SECRET_KEY: ${MODELNEST_SECRET_KEY:?set MODELNEST_SECRET_KEY in .env}
       MODELNEST_BOOTSTRAP_TOKEN: ${MODELNEST_BOOTSTRAP_TOKEN:?set MODELNEST_BOOTSTRAP_TOKEN in .env}

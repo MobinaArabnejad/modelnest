@@ -20,10 +20,10 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> User:
     username = payload.username.strip().lower()
     first_user = db.scalar(select(func.count(User.id))) == 0
     settings = db.info["settings"]
-    if first_user and settings.environment.lower() == "production":
+    if first_user:
         expected = settings.bootstrap_token or ""
         supplied = payload.bootstrap_token or ""
-        if not secrets.compare_digest(supplied, expected):
+        if not expected or not secrets.compare_digest(supplied, expected):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="valid bootstrap token required for the first administrator",

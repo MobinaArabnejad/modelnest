@@ -16,6 +16,7 @@ def client(tmp_path) -> Generator[TestClient, None, None]:
         database_url=f"sqlite:///{tmp_path / 'test.db'}",
         secret_key="test-secret-key-with-more-than-thirty-two-characters",
         storage_dir=tmp_path / "artifacts",
+        bootstrap_token="test-bootstrap-token-with-more-than-20-chars",
         access_token_minutes=5,
         max_upload_bytes=1024 * 1024,
     )
@@ -23,8 +24,16 @@ def client(tmp_path) -> Generator[TestClient, None, None]:
         yield test_client
 
 
-def register(client: TestClient, username: str, password: str = "correct-horse-battery"):
-    return client.post("/api/auth/register", json={"username": username, "password": password})
+def register(
+    client: TestClient,
+    username: str,
+    password: str = "correct-horse-battery",
+    bootstrap_token: str = "test-bootstrap-token-with-more-than-20-chars",
+):
+    return client.post(
+        "/api/auth/register",
+        json={"username": username, "password": password, "bootstrap_token": bootstrap_token},
+    )
 
 
 def login_headers(
