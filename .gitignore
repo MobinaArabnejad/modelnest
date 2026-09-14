@@ -10,6 +10,7 @@ __pycache__/
 data/
 *.db
 models/
+security-reports/
 *.safetensors
 *.onnx
 *.pt
